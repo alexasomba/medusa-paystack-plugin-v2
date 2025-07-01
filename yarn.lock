@@ -1397,7 +1397,7 @@
     tailwindcss "^3.3.6"
     vite "^5.4.14"
 
-"@medusajs/admin-sdk@2.8.6":
+"@medusajs/admin-sdk@^2.8.6":
   version "2.8.6"
   resolved "https://registry.npmjs.org/@medusajs/admin-sdk/-/admin-sdk-2.8.6.tgz"
   integrity sha512-h2IZ/UmBTA1ODyQ+gnKTA5sWJgY+J6xrhPM34K0IeGdgTVA6k16F78l7BGKbCUX4mKrumiX51omMLT0oXRy7dQ==
@@ -1486,7 +1486,7 @@
   resolved "https://registry.npmjs.org/@medusajs/cart/-/cart-2.8.6.tgz"
   integrity sha512-vPXCCpW3H9WWVorWwcwanz9lK/QanTUXQQugoPI3pa1ZepoPGxIuvLG4bENRjR/vhjFJR2P62wzmI8pP3utcvA==
 
-"@medusajs/cli@2.8.6":
+"@medusajs/cli@^2.8.6", "@medusajs/cli@2.8.6":
   version "2.8.6"
   resolved "https://registry.npmjs.org/@medusajs/cli/-/cli-2.8.6.tgz"
   integrity sha512-fWYlZRNccBbpiH6nlD/bmTrU//XFeEXH63Ax9EjU6TB/ICZoO5g8PS8qa9N3XdyORXE5MGNT9u2hptcpbZfzGA==
@@ -1609,7 +1609,7 @@
   resolved "https://registry.npmjs.org/@medusajs/file/-/file-2.8.6.tgz"
   integrity sha512-lzibesA6HXti73NaoQCJD6UHjaihXoK6XRfqOhYH6+TgmTulAXnoyVzgp9Gb6uO0VNvKOrJ9uLnIty8ReCyFhA==
 
-"@medusajs/framework@2.8.6":
+"@medusajs/framework@^2.8.6", "@medusajs/framework@2.8.6":
   version "2.8.6"
   resolved "https://registry.npmjs.org/@medusajs/framework/-/framework-2.8.6.tgz"
   integrity sha512-znUrhTgKLoPpbWNdl8QOwOy4tmzxoyQmdfwq+lMR/L8kjSBgG8FhUHfyNhgQbovfNjMVTinubnzr74Hv6Q7h5g==
@@ -1649,15 +1649,15 @@
   resolved "https://registry.npmjs.org/@medusajs/fulfillment/-/fulfillment-2.8.6.tgz"
   integrity sha512-262LoV/ee3yFfFx7JtEbl7N7Dp5kYwbcCaZ90d7E7YffEnSUeaUaa0zGagJwk2ahd66SsW5e1F0I7VPIuZvLEQ==
 
+"@medusajs/icons@^2.8.6", "@medusajs/icons@2.8.6":
+  version "2.8.6"
+  resolved "https://registry.npmjs.org/@medusajs/icons/-/icons-2.8.6.tgz"
+  integrity sha512-k3X1nA1L0eoR30tfAzCxTtpaE1h28K2qmuNyangOoBJObHkaD+gNIi3AG+2iLlmIrByzfCgzP0JvhzrtFFha4Q==
+
 "@medusajs/icons@~2.4.0":
   version "2.4.0"
   resolved "https://registry.npmjs.org/@medusajs/icons/-/icons-2.4.0.tgz"
   integrity sha512-aV1IMycbSPuqFXtXFuU/KA/gNsgUc5EZ+TzQgNPaU7vOGEbUeYPrSSgD96SQijJ2CZpvV0Fs9CaLqEbVXQmmQQ==
-
-"@medusajs/icons@2.8.6":
-  version "2.8.6"
-  resolved "https://registry.npmjs.org/@medusajs/icons/-/icons-2.8.6.tgz"
-  integrity sha512-k3X1nA1L0eoR30tfAzCxTtpaE1h28K2qmuNyangOoBJObHkaD+gNIi3AG+2iLlmIrByzfCgzP0JvhzrtFFha4Q==
 
 "@medusajs/index@2.8.6":
   version "2.8.6"
@@ -1700,7 +1700,7 @@
   resolved "https://registry.npmjs.org/@medusajs/locking/-/locking-2.8.6.tgz"
   integrity sha512-Ag818xjoc+sddpAICnzfhKPHrtNC3nvF1Yp2TKIku94n5zArK4xS+G7OqoLhYZGQiji8Srgc+yjCACdIiKVh5Q==
 
-"@medusajs/medusa@2.8.6":
+"@medusajs/medusa@^2.8.6", "@medusajs/medusa@2.8.6":
   version "2.8.6"
   resolved "https://registry.npmjs.org/@medusajs/medusa/-/medusa-2.8.6.tgz"
   integrity sha512-oIzoihMxV5tf5P1mDJ142NZZiLTDV+zHUj04DczWRJt+lQbIEWSnMI/rTloAlyzlh7n6z6U2aMhWiWfgL6J9zw==
@@ -1878,7 +1878,7 @@
     remove-trailing-slash "^0.1.1"
     uuid "^8.3.2"
 
-"@medusajs/test-utils@2.8.6":
+"@medusajs/test-utils@^2.8.6":
   version "2.8.6"
   resolved "https://registry.npmjs.org/@medusajs/test-utils/-/test-utils-2.8.6.tgz"
   integrity sha512-SrhtWUPc23PT3j7tNBLSo04mK4s2slsXbMCaE6AkknTKwTs2OOunzeLwI266q1lyhRHdejdIXp9BPXrEcPeLpQ==
@@ -1896,26 +1896,7 @@
   dependencies:
     bignumber.js "^9.1.2"
 
-"@medusajs/ui@4.0.16":
-  version "4.0.16"
-  resolved "https://registry.npmjs.org/@medusajs/ui/-/ui-4.0.16.tgz"
-  integrity sha512-eAziJhmVM4mQPbAE1qXFKF3oTk+j32XFjXU8LEjuw5TN8gXuWHEu+5/aNxycV8N01ooO41Bms5rcGzPuj8kcGw==
-  dependencies:
-    "@medusajs/icons" "2.8.6"
-    "@tanstack/react-table" "8.20.5"
-    clsx "^1.2.1"
-    copy-to-clipboard "^3.3.3"
-    cva "1.0.0-beta.1"
-    prism-react-renderer "^2.0.6"
-    prismjs "^1.29.0"
-    radix-ui "1.1.2"
-    react-aria "^3.33.1"
-    react-currency-input-field "^3.6.11"
-    react-stately "^3.31.1"
-    sonner "^1.5.0"
-    tailwind-merge "^2.2.1"
-
-"@medusajs/ui@4.0.4":
+"@medusajs/ui@^4.0.4":
   version "4.0.4"
   resolved "https://registry.npmjs.org/@medusajs/ui/-/ui-4.0.4.tgz"
   integrity sha512-ci3SBRcLHwJj45bpoYmVE/Lk/WupF3j2kEPzmmWKAmMlULLTPDvHjtCm6E6qJV4z8L1aD67KOqndMnOTVXuv/A==
@@ -1942,6 +1923,25 @@
     cva "1.0.0-beta.1"
     prism-react-renderer "^2.0.6"
     prismjs "^1.29.0"
+    react-aria "^3.33.1"
+    react-currency-input-field "^3.6.11"
+    react-stately "^3.31.1"
+    sonner "^1.5.0"
+    tailwind-merge "^2.2.1"
+
+"@medusajs/ui@4.0.16":
+  version "4.0.16"
+  resolved "https://registry.npmjs.org/@medusajs/ui/-/ui-4.0.16.tgz"
+  integrity sha512-eAziJhmVM4mQPbAE1qXFKF3oTk+j32XFjXU8LEjuw5TN8gXuWHEu+5/aNxycV8N01ooO41Bms5rcGzPuj8kcGw==
+  dependencies:
+    "@medusajs/icons" "2.8.6"
+    "@tanstack/react-table" "8.20.5"
+    clsx "^1.2.1"
+    copy-to-clipboard "^3.3.3"
+    cva "1.0.0-beta.1"
+    prism-react-renderer "^2.0.6"
+    prismjs "^1.29.0"
+    radix-ui "1.1.2"
     react-aria "^3.33.1"
     react-currency-input-field "^3.6.11"
     react-stately "^3.31.1"

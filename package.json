@@ -1,6 +1,6 @@
 {
   "name": "@alexasomba/medusa-paystack-plugin-v2",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "A Medusa v2 plugin for Paystack payment integration.",
   "author": "Alex Asomba <alexasomba@example.com>",
   "license": "MIT",
@@ -45,13 +45,13 @@
     "prepublishOnly": "medusa plugin:build"
   },
   "devDependencies": {
-    "@medusajs/admin-sdk": "2.8.6",
-    "@medusajs/cli": "2.8.6",
-    "@medusajs/framework": "2.8.6",
-    "@medusajs/icons": "2.8.6",
-    "@medusajs/medusa": "2.8.6",
-    "@medusajs/test-utils": "2.8.6",
-    "@medusajs/ui": "4.0.4",
+    "@medusajs/admin-sdk": "^2.8.6",
+    "@medusajs/cli": "^2.8.6",
+    "@medusajs/framework": "^2.8.6",
+    "@medusajs/icons": "^2.8.6",
+    "@medusajs/medusa": "^2.8.6",
+    "@medusajs/test-utils": "^2.8.6",
+    "@medusajs/ui": "^4.0.4",
     "@mikro-orm/cli": "6.4.3",
     "@mikro-orm/core": "6.4.3",
     "@mikro-orm/knex": "6.4.3",

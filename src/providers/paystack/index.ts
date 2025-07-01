@@ -8,7 +8,6 @@ import {
   RefundPaymentOutput,
   GetPaymentStatusInput,
   GetPaymentStatusOutput,
-  PaymentProviderOutput,
   InitiatePaymentInput,
   InitiatePaymentOutput,
   UpdatePaymentInput,
