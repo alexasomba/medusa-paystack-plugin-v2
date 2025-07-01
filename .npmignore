@@ -1,0 +1,20 @@
+# Ignore config and build tooling
+.vscode/
+node_modules/
+dist/
+test/
+coverage/
+.env*
+*.log
+*.ts
+*.tsx
+*.map
+*.lock
+
+# GitHub workflows and metadata
+.github/
+.git/
+.gitignore
+
+# Local dev files
+yalc.lock
