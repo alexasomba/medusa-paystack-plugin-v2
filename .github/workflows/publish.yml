@@ -7,6 +7,13 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+  pull-requests: read
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -86,7 +93,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
@@ -108,5 +115,9 @@ jobs:
             
             **Full Changelog**: https://github.com/alexasomba/medusa-paystack-plugin-v2/commits/${{ github.ref_name }}
           generate_release_notes: true
+          fail_on_unmatched_files: false
+          draft: false
+          prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
