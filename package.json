@@ -4,6 +4,9 @@
   "description": "A Medusa v2 plugin for Paystack payment integration.",
   "author": "Alex Asomba <alexasomba@example.com>",
   "license": "MIT",
+  "publishConfig": { 
+    "access": "public" 
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/alexasomba/medusa-paystack-plugin-v2.git"
