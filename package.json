@@ -1,6 +1,6 @@
 {
   "name": "@alexasomba/medusa-paystack-plugin-v2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Medusa v2 plugin for Paystack payment integration.",
   "author": "Alex Asomba <alexasomba@example.com>",
   "license": "MIT",
