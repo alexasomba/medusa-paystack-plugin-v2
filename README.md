@@ -1,290 +1,479 @@
-# Medusa Paystack Plugin
+# Medusa Paystack Plugin v2
 
-A comprehensive Paystack payment integration plugin for Medusa v2 that enables seamless payment processing using Paystack's robust payment infrastructure.
+A robust Paystack payment integration plugin for **Medusa v2.8.6+** that provides seamless payment processing using Paystack's payment infrastructure with support for the new payment session lifecycle.
 
-## Features
+## ✨ Features
 
 - 🚀 **Complete Payment Flow**: Initialize, authorize, capture, and refund payments
-- 🔐 **Secure Transactions**: Built-in webhook verification and secure API communication
-- 🌍 **Multi-Currency Support**: Support for NGN, USD, GHS, ZAR, and KES
-- 📱 **Mobile-Friendly**: Optimized for mobile payment experiences
-- 🎯 **Admin Integration**: Full admin panel integration for payment management
-- 🔄 **Real-time Updates**: Webhook support for real-time payment status updates
+- 🔐 **Secure Transactions**: Built-in webhook verification and secure API communication  
+- 🌍 **Multi-Currency Support**: NGN, USD, GHS, ZAR with automatic currency conversion
+- 📱 **Modern Payment Experience**: Paystack Popup integration with retry mechanisms
+- 🎯 **Medusa v2 Compatible**: Full support for new payment session lifecycle
+- 🔄 **Session Management**: Intelligent session refresh and expiry handling
+- 🛡️ **Error Handling**: Comprehensive error handling with user-friendly messages
 
-## Installation
+## 📦 Installation
 
-1. **Install the plugin**:
-   ```bash
-   npm install medusa-paystack-plugin
-   ```
+### 1. Install the Plugin
 
-2. **Add environment variables** to your `.env` file:
-   ```env
-   PAYSTACK_SECRET_KEY=sk_test_your_secret_key
-   PAYSTACK_PUBLIC_KEY=pk_test_your_public_key
-   PAYSTACK_WEBHOOK_SECRET=your_webhook_secret
-   ```
+```bash
+npm install @alexasomba/medusa-paystack-plugin-v2
+# or
+yarn add @alexasomba/medusa-paystack-plugin-v2
+```
 
-3. **Configure the plugin** in your `medusa-config.ts`:
-   ```typescript
-   import { defineConfig } from "@medusajs/medusa"
+### 2. Environment Configuration
 
-   export default defineConfig({
-     // ... other configurations
-     plugins: [
-       {
-         resolve: "medusa-paystack-plugin",
-         options: {
-           secret_key: process.env.PAYSTACK_SECRET_KEY,
-           public_key: process.env.PAYSTACK_PUBLIC_KEY,
-           webhook_secret: process.env.PAYSTACK_WEBHOOK_SECRET,
-         },
-       },
-     ],
-     // ... rest of configuration
-   })
-   ```
+Add these environment variables to your `.env` file:
 
-4. **Add the payment provider** to your payment module configuration:
-   ```typescript
-   // In your medusa-config.ts
-   export default defineConfig({
-     modules: [
-       {
-         resolve: "@medusajs/payment",
-         options: {
-           providers: [
-             {
-               resolve: "medusa-paystack-plugin",
-               id: "paystack",
-               options: {
-                 secret_key: process.env.PAYSTACK_SECRET_KEY,
-                 public_key: process.env.PAYSTACK_PUBLIC_KEY,
-                 webhook_secret: process.env.PAYSTACK_WEBHOOK_SECRET,
-               },
-             },
-           ],
-         },
-       },
-     ],
-   })
-   ```
+```env
+# Paystack Configuration
+PAYSTACK_SECRET_KEY=sk_test_your_secret_key_here
+PAYSTACK_PUBLIC_KEY=pk_test_your_public_key_here
+PAYSTACK_WEBHOOK_SECRET=your_webhook_secret_here
+```
 
-## Configuration
+### 3. Medusa Configuration
+
+Configure the plugin in your `medusa-config.ts`:
+
+```typescript
+import { loadEnv, defineConfig } from '@medusajs/framework/utils'
+
+loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+
+module.exports = defineConfig({
+  projectConfig: {
+    databaseUrl: process.env.DATABASE_URL,
+    http: {
+      storeCors: process.env.STORE_CORS!,
+      adminCors: process.env.ADMIN_CORS!,
+      authCors: process.env.AUTH_CORS!,
+      jwtSecret: process.env.JWT_SECRET || "supersecret",
+      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+    }
+  },
+  modules: [
+    {
+      resolve: "@medusajs/payment",
+      options: {
+        providers: [
+          {
+            resolve: "@alexasomba/medusa-paystack-plugin-v2",
+            id: "paystack",
+            options: {
+              secret_key: process.env.PAYSTACK_SECRET_KEY,
+              public_key: process.env.PAYSTACK_PUBLIC_KEY,
+              webhook_secret: process.env.PAYSTACK_WEBHOOK_SECRET,
+            },
+          },
+        ],
+      },
+    },
+  ],
+})
+```
+
+### 4. Build and Start
+
+```bash
+npm run build
+npm run dev
+```
+
+## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `PAYSTACK_SECRET_KEY` | Your Paystack secret key from dashboard | ✅ |
-| `PAYSTACK_PUBLIC_KEY` | Your Paystack public key from dashboard | ✅ |
-| `PAYSTACK_WEBHOOK_SECRET` | Webhook secret for verifying webhooks | ⚠️ Recommended |
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `PAYSTACK_SECRET_KEY` | Your Paystack secret key | ✅ | `sk_test_...` |
+| `PAYSTACK_PUBLIC_KEY` | Your Paystack public key | ✅ | `pk_test_...` |
+| `PAYSTACK_WEBHOOK_SECRET` | Webhook secret for verification | ⚠️ Recommended | `whsec_...` |
 
-### Plugin Options
+### Plugin Configuration
 
 ```typescript
 interface PaystackConfig {
-  secret_key: string    // Paystack secret key
-  public_key: string    // Paystack public key  
-  webhook_secret?: string // Optional webhook secret for verification
+  secret_key: string      // Paystack secret key
+  public_key: string      // Paystack public key  
+  webhook_secret?: string // Optional webhook secret
 }
 ```
 
-## Frontend Integration
+## 🖥️ Frontend Integration
 
-### React/Next.js Storefront
+### Next.js Storefront Integration
 
-Here's how to integrate Paystack payments in your storefront:
+Install required dependencies in your storefront:
 
-```typescript
+```bash
+npm install @paystack/inline-js
+```
+
+### 1. Paystack Payment Component
+
+```tsx
 // components/PaystackPayment.tsx
-import { usePaymentSession } from "@medusajs/react"
+"use client"
 
-export function PaystackPayment({ session, onPaymentCompleted }) {
+import { useState } from "react"
+import { toast } from "@medusajs/ui"
+
+interface PaystackPaymentProps {
+  session: any
+  cart: any
+  onPaymentCompleted: (reference: string) => void
+  onPaymentFailed: (error: string) => void
+}
+
+export function PaystackPayment({ 
+  session, 
+  cart,
+  onPaymentCompleted, 
+  onPaymentFailed 
+}: PaystackPaymentProps) {
+  const [isLoading, setIsLoading] = useState(false)
+
   const initializePayment = async () => {
     try {
-      // The session data includes authorization_url and public_key
-      const { authorization_url, public_key } = session.data
+      setIsLoading(true)
       
-      // Redirect to Paystack payment page
-      window.location.href = authorization_url
+      const { access_code, authorization_url } = session.data
       
-      // Alternative: Use Paystack Popup (requires Paystack script)
-      const handler = PaystackPop.setup({
-        key: public_key,
-        email: session.customer_email,
-        amount: session.amount,
-        currency: session.currency_code,
-        ref: session.data.reference,
-        callback: function(response) {
-          // Payment successful, verify on backend
-          onPaymentCompleted(response.reference)
+      if (!access_code) {
+        throw new Error("Payment session not ready")
+      }
+
+      // Use Paystack Popup
+      const PaystackPop = (await import("@paystack/inline-js")).default
+      const popup = new PaystackPop()
+      
+      popup.resumeTransaction(access_code, {
+        onClose: () => {
+          setIsLoading(false)
+          toast.warning("Payment was cancelled")
         },
-        onClose: function() {
-          // User closed payment modal
+        onSuccess: (transaction: any) => {
+          setIsLoading(false)
+          toast.success("Payment successful!")
+          onPaymentCompleted(transaction.reference)
+        },
+        onError: (error: any) => {
+          setIsLoading(false)
+          let errorMessage = "Payment failed"
+          
+          if (error.message?.toLowerCase().includes('not found')) {
+            errorMessage = "Payment session expired. Please try again."
+          }
+          
+          toast.error(errorMessage)
+          onPaymentFailed(errorMessage)
         }
       })
       
-      handler.openIframe()
     } catch (error) {
-      console.error("Payment initialization failed:", error)
+      setIsLoading(false)
+      onPaymentFailed(error.message)
     }
   }
 
   return (
-    <button onClick={initializePayment}>
-      Pay with Paystack
+    <button
+      onClick={initializePayment}
+      disabled={isLoading}
+      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg"
+    >
+      {isLoading ? "Processing..." : "Pay with Paystack"}
     </button>
   )
 }
 ```
 
-### Payment Verification
+### 2. Payment Session Hook
 
-```typescript
-// utils/verifyPayment.ts
-export async function verifyPayment(reference: string) {
-  const response = await fetch(`/api/paystack/verify?reference=${reference}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  
-  return response.json()
+```tsx
+// hooks/use-paystack-session.tsx
+import { useState, useEffect } from "react"
+
+export function usePaystackSession({ session, cart, onSessionUpdate }) {
+  const [isReady, setIsReady] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  useEffect(() => {
+    if (session?.data) {
+      const { authorization_url, access_code, session_expired, payment_completed } = session.data
+      
+      const isExpiredOrCompleted = session_expired === true || payment_completed === true
+      const ready = !isExpiredOrCompleted && 
+                   ((session.status === "requires_more" && (authorization_url || access_code)) ||
+                    session.status === "authorized")
+      
+      setIsReady(ready)
+    }
+  }, [session])
+
+  const updateSession = async (customerData?: any) => {
+    if (!cart?.payment_collection?.id) return false
+
+    setIsUpdating(true)
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/payment-collections/${cart.payment_collection.id}/payment-sessions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
+          },
+          body: JSON.stringify({
+            provider_id: "pp_paystack_paystack",
+            data: { email: customerData?.email || cart.email }
+          }),
+        }
+      )
+
+      if (response.ok) {
+        const result = await response.json()
+        const paystackSession = result.payment_collection.payment_sessions?.find(
+          (s: any) => s.provider_id === 'pp_paystack_paystack'
+        )
+        
+        if (paystackSession && onSessionUpdate) {
+          onSessionUpdate(paystackSession)
+          return true
+        }
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Session update failed:', error)
+      return false
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  return {
+    isReady,
+    isUpdating,
+    updateSession,
+    sessionData: session?.data,
+  }
 }
 ```
 
-## Backend Integration
+### 3. Integration in Checkout
 
-### Webhook Setup
+```tsx
+// In your checkout component
+import { PaystackPayment } from "./PaystackPayment"
+import { usePaystackSession } from "./use-paystack-session"
 
-1. **Set up webhook endpoint** in your Paystack dashboard:
-   ```
-   https://yourdomain.com/paystack/webhook
-   ```
+export function CheckoutPayment({ cart }) {
+  const paystackSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => session.provider_id === "pp_paystack_paystack"
+  )
 
-2. **Configure webhook events**:
-   - `charge.success` - Payment successful
-   - `charge.failed` - Payment failed
-
-### Custom Admin Actions
-
-```typescript
-// Admin action to refund payment
-const refundPayment = async (reference: string, amount: number) => {
-  const response = await fetch("/admin/paystack", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${adminToken}`,
-    },
-    body: JSON.stringify({
-      action: "refund",
-      reference,
-      amount,
-    }),
+  const { isReady, updateSession } = usePaystackSession({
+    session: paystackSession,
+    cart,
+    onSessionUpdate: (updatedSession) => {
+      // Handle session update
+    }
   })
-  
-  return response.json()
+
+  const handlePaymentCompleted = async (reference: string) => {
+    // Complete the cart/order
+    const response = await fetch(`/store/carts/${cart.id}/complete`, {
+      method: "POST",
+      headers: {
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
+      },
+    })
+    
+    if (response.ok) {
+      // Redirect to success page
+      window.location.href = "/order/confirmed"
+    }
+  }
+
+  if (!paystackSession) {
+    return <div>Paystack payment not available</div>
+  }
+
+  return (
+    <PaystackPayment
+      session={paystackSession}
+      cart={cart}
+      onPaymentCompleted={handlePaymentCompleted}
+      onPaymentFailed={(error) => console.error("Payment failed:", error)}
+    />
+  )
 }
 ```
 
-## API Reference
+## 🔧 Backend Features
 
-### Webhook Events
+### Payment Session Lifecycle
 
-The plugin handles the following Paystack webhook events:
+The plugin correctly implements Medusa v2's payment session states:
 
-- `charge.success` - Payment completed successfully
-- `charge.failed` - Payment failed
-- `transfer.success` - Transfer completed (for marketplaces)
-- `transfer.failed` - Transfer failed
+- **`pending`** - Session created but awaiting customer email
+- **`requires_more`** - Ready for payment (has authorization URL)
+- **`authorized`** - Payment completed successfully
+- **`error`** - Payment failed or session error
 
-### Admin Endpoints
+### Session Refresh & Expiry Handling
 
-- `GET /admin/paystack?reference=<ref>` - Verify payment status
-- `POST /admin/paystack` - Perform admin actions (refund, verify)
+The plugin automatically handles:
 
-### Store Endpoints
+- Expired access codes
+- Completed payment sessions
+- Session recreation for retry scenarios
+- Customer email validation
 
-- `POST /store/paystack/webhook` - Webhook endpoint for Paystack events
+### Webhook Support
 
-## Development
+Set up webhooks in your Paystack dashboard:
 
-### Building the Plugin
-
-```bash
-npm run build
+```txt
+Webhook URL: https://yourdomain.com/store/paystack/webhook/route
+Events: charge.success, charge.failed
 ```
 
-### Development Mode
+### API Endpoints
 
-```bash
-npm run dev
+The plugin provides these endpoints:
+
+- `POST /store/paystack/webhook/route` - Webhook handler
+- `GET /admin/paystack/route` - Admin verification
+- `GET /store/plugin/route` - Plugin status
+
+## 💰 Supported Currencies
+
+| Currency | Code | Subunit | Example |
+|----------|------|---------|---------|
+| Nigerian Naira | NGN | kobo | ₦100.00 |
+| US Dollar | USD | cents | $1.00 |
+| Ghanaian Cedi | GHS | pesewas | GH₵1.00 |
+| South African Rand | ZAR | cents | R1.00 |
+
+## 🔍 Testing
+
+### Test Cards
+
+Use these test cards in development:
+
+```txt
+# Successful Payment
+Card: 4084 0840 8408 4081
+CVV: 408
+Expiry: 12/25
+
+# Declined Payment  
+Card: 4084 0840 8408 4096
+CVV: 408
+Expiry: 12/25
 ```
 
-### Testing
+### Development Workflow
 
-```bash
-npm test
-```
+1. Use test API keys from Paystack dashboard
+2. Test with different scenarios (success, failure, expired sessions)
+3. Verify webhook delivery in Paystack dashboard
+4. Test session refresh and retry mechanisms
 
-## Supported Currencies
-
-- 🇳🇬 **NGN** - Nigerian Naira
-- 🇺🇸 **USD** - US Dollar  
-- 🇬🇭 **GHS** - Ghanaian Cedi
-- 🇿🇦 **ZAR** - South African Rand
-- 🇰🇪 **KES** - Kenyan Shilling
-
-## Security
-
-- All API communications use HTTPS
-- Webhook signature verification prevents tampering
-- Sensitive data is never logged
-- API keys are securely stored in environment variables
-
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Common Issues
 
-1. **"Invalid API Key" Error**
-   - Verify your secret key in environment variables
-   - Ensure you're using the correct key for your environment (test/live)
+#### "Not found" Error in Payment Popup
 
-2. **Webhook Not Working**
-   - Verify webhook URL is accessible
-   - Check webhook secret configuration
-   - Review server logs for errors
+- This occurs when trying to reuse an expired/completed access code
+- The plugin automatically handles this with session refresh
+- Ensure your frontend implements the session refresh logic
 
-3. **Payment Not Completing**
-   - Check payment amount is in correct format (minor units)
-   - Verify customer email is provided
-   - Check Paystack dashboard for transaction status
+#### Session Status Undefined Error
 
-### Debug Mode
+- Fixed in v1.3.3+ - plugin now always returns valid status
+- Update to latest version if experiencing this
 
-Enable debug logging by setting:
+#### Customer Email Missing
+
+- Ensure customer email is provided during session creation
+- Plugin returns `pending` status until email is available
+
+#### Webhook Not Triggering
+
+- Verify webhook URL is publicly accessible
+- Check webhook secret configuration
+- Review Paystack dashboard for delivery logs
+
+### Debugging
+
+Enable detailed logging:
+
 ```env
 LOG_LEVEL=debug
+NODE_ENV=development
 ```
 
-## Support
+This will show detailed logs for:
 
-- 📧 **Email**: alex@asomba.com
-- 💬 **Discord**: [Medusa Community](https://discord.gg/medusajs)
-- 📖 **Documentation**: [Medusa Docs](https://docs.medusajs.com)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/alexasomba/medusa-paystack-plugin-v2/issues)
+- Payment session creation
+- Paystack API responses  
+- Session status changes
+- Error details
 
-## License
+## 📊 Migration from v1
+
+If upgrading from v1, note these breaking changes:
+
+1. **Provider ID**: Now uses `pp_paystack_paystack` format
+2. **Session Management**: New lifecycle handling
+3. **Configuration**: Updated to Medusa v2 format
+4. **Dependencies**: Uses official Paystack SDK
+
+### Migration Steps
+
+1. Update configuration to new format
+2. Install new version: `npm install @alexasomba/medusa-paystack-plugin-v2`
+3. Update frontend integration to use new session states
+4. Test thoroughly with new session refresh logic
+
+## 🚀 Version History
+
+- **v1.3.3** - Fixed session status handling and expiry management
+- **v1.3.0** - Added session refresh and error handling improvements  
+- **v1.2.0** - Multi-currency support and official Paystack SDK
+- **v1.1.0** - Webhook support and admin integration
+- **v1.0.0** - Initial release for Medusa v2
+
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## 📞 Support
+
+- 📧 **Email**: <alex@asomba.com>
+- 💬 **GitHub Issues**: [Report Issues](https://github.com/alexasomba/medusa-paystack-plugin-v2/issues)
+- 📖 **Documentation**: [Medusa Docs](https://docs.medusajs.com)
+- 🌍 **Community**: [Medusa Discord](https://discord.gg/medusajs)
+
+## ⭐ Show Your Support
+
+If this plugin helps your project, please give it a star on GitHub! ⭐
+
+---
+
+Built with ❤️ for the Medusa community
