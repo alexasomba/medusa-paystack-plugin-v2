@@ -1,23 +1,112 @@
-name: Publish to npm
+name: Publish to NPM
 
 on:
   push:
-    branches:
-      - main  # or your default branch
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.3.3
+  release:
+    types: [published]
 
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org/'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-      - run: npm install
-      - run: npm run build  # if you have a build step
-      - run: npm publish
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (if available)
+        run: npm test --if-present
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "Checking build output..."
+          ls -la .medusa/server/ || echo "Build output not found"
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Verify package.json version matches tag
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Package version: $PACKAGE_VERSION"
+          echo "Tag version: $TAG_VERSION"
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Version mismatch: package.json ($PACKAGE_VERSION) != tag ($TAG_VERSION)"
+            exit 1
+          fi
+          echo "✅ Version match confirmed"
+
+      - name: Verify build output exists
+        run: |
+          if [ ! -d ".medusa/server" ]; then
+            echo "❌ Build output missing"
+            exit 1
+          fi
+          echo "✅ Build output verified"
+
+      - name: Publish to NPM
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 Release ${{ github.ref_name }}
+            
+            ### Installation
+            
+            ```bash
+            npm install @alexasomba/medusa-paystack-plugin-v2@${{ github.ref_name }}
+            ```
+            
+            ### What's Changed
+            
+            - Check the commit history for detailed changes
+            - Updated plugin compatibility and features
+            
+            ### Full Changelog
+            
+            **Full Changelog**: https://github.com/alexasomba/medusa-paystack-plugin-v2/commits/${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
