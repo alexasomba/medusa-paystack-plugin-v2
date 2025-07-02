@@ -1,4 +1,4 @@
-# Medusa Paystack Plugin v2
+# Medusa v2 Paystack Plugin
 
 A robust Paystack payment integration plugin for **Medusa v2.8.6+** that provides seamless payment processing using Paystack's payment infrastructure with support for the new payment session lifecycle.
 
